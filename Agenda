@@ -1,0 +1,198 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/*Pratique
+Convido voce a pensar, sobre uma proposta em que 
+devera ser implementado um algoritmo usando fundamentos de uma pilha 
+com estruturas de dados do tipo LIFO (last-in first-out). 
+Pode ser aplicado algo parecido com uma agenda, 
+em que o cC3digo implementado serC! uma lista que ira
+guardar contatos, os quais devem possuir alguns dados, como: 
+nome, telefone e e-mail do contato em uma matriz. 
+Ao final disponibilize seu trabalho no forum da secao.*/
+
+void
+opcoes ()			//Menu inicial
+{
+  printf ("1 - Adicionar Contato\n");
+  printf ("2 - Exibir contatos\n");
+  printf ("0 - Sair\n");
+}
+
+//VariC!veis======================================================================================
+
+int
+listarContatos ()
+{
+  FILE *agenda, *telefone_f, *email_f;
+  char linhaAgenda[200], linhaEmail[200], linhaTelefone[200];	//Matrizes de ate 200 caracteres.
+  char *id, *id_tel, *id_email, *name, *telefone, *email;
+
+  if ((agenda = fopen ("agenda.txt", "r")) == NULL)	//Caso a agenda esteja vazia.
+    {
+      printf ("NC#o hC! contatos a serem exibidos. \n\n");
+      return 0;			//Retorna ao menu inicial.
+    }
+
+  while (fgets (linhaAgenda, 200, agenda) != NULL)	//Enquanto a agenda nao estiver vazia...
+    {
+      id = strtok (linhaAgenda, ":");
+      name = strtok (NULL, ":");
+      printf ("Contato: %s\n", id);
+      printf ("\tNome: %s\n", name);
+
+      printf ("\tTelefone:");
+      if ((telefone_f = fopen ("telefone.txt", "r")) == NULL)
+	{
+	  return -1;
+	}
+      while (fgets (linhaTelefone, 200, telefone_f) != NULL)
+	{
+	  id_tel = strtok (linhaTelefone, ":");
+	  telefone = strtok (NULL, ":");
+
+	  if (strcmp (id, id_tel) == 0)
+	    {
+	      printf ("\t\t%s\n", telefone);
+	    }
+	}
+      fclose (telefone_f);
+
+      if ((email_f = fopen ("email.txt", "r")) == NULL)
+	{
+	  return -1;
+	}
+      printf ("\tEmail: ");
+      while (fgets (linhaEmail, 200, email_f) != NULL)
+	{
+	  id_email = strtok (linhaEmail, ":");
+	  email = strtok (NULL, ":");
+
+	  if (strcmp (id, id_email) == 0)
+	    {
+	      printf ("\t\t%s\n", email);
+	    }
+	}
+      fclose (email_f);
+    }
+  fclose (agenda);
+
+  return 0;
+
+}
+
+//Contadores======================================================================================
+
+int
+countlines (char *name)
+{
+  int count = 1;
+  int c;
+  FILE *fp = fopen (name, "r");
+  if (fp == NULL)
+    {
+      count = 1;
+      return count;
+    }
+
+  while ((c = fgetc (fp)) != EOF)
+    {
+      if (c == '\n')
+	count++;
+    }
+  fclose (fp);
+  return count;
+}
+
+//Adicao de Contatos==================================================================
+
+int
+main (int argc, char *argv[])
+{
+  FILE *agenda, *telefone_f, *email_f;
+  int op, id;
+  char nome[30], telefone[20], email[60];
+
+  id = countlines ("agenda.txt");
+
+  do
+    {
+      opcoes ();
+      scanf ("%d", &op);
+
+      switch (op)
+	{
+	case 1:		//Adicinar o contato.
+	  printf ("Nome: ");
+	  scanf ("%s", nome);
+
+	  agenda = fopen ("agenda.txt", "a+");
+	  fprintf (agenda, "%d:%s\n", id, nome);
+	  fclose (agenda);
+
+	  // Telefones
+	  printf ("Telefone: ");
+	  scanf ("%s", telefone);
+
+	  telefone_f = fopen ("telefone.txt", "a+");
+	  fprintf (telefone_f, "%d:%s\n", id, telefone);
+
+	  /*    
+	     printf ("Deseja adicionar mais telefones? (1/0)\n");
+	     scanf ("%d", &opc_tel);
+
+	     while (opc_tel != 0)
+	     {
+	     printf ("Telefone: ");
+	     scanf ("%s", telefone);
+
+	     fprintf (telefone_f, "%d:%s\n", id, telefone);
+
+	     printf ("Deseja adicionar mais telefones? (1/0)\n");
+	     scanf ("%d", &opc_tel);
+	     }
+	   */
+	  fclose (telefone_f);
+
+
+	  // Informar os Emails
+	  printf ("Email: ");
+	  scanf ("%s", email);
+
+	  email_f = fopen ("email.txt", "a+");
+	  fprintf (email_f, "%d:%s\n", id, email);
+
+	  /*  
+	     printf ("Deseja adicionar mais emails? (1/0)\n");
+	     scanf ("%d", &opc_email);
+
+	     while (opc_email != 0)
+	     {
+	     printf ("Email: ");
+	     scanf ("%s", email);
+
+	     fprintf (email_f, "%d:%s\n", id, email);
+
+	     printf ("Deseja adicionar mais emails? (1/0)\n");
+	     scanf ("%d", &opc_email);
+	     }
+	   */
+	  fclose (email_f);
+
+
+	  printf ("Contato adicionado!\n");
+	  id++;
+	  break;
+
+	case 2:		//Exibir os contatos cadastrados
+	  listarContatos ();
+	  break;
+	default:
+	  printf ("Bye. \n");
+	}
+
+    }
+  while (op != 0);
+  return 0;
+}
